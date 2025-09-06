@@ -6,7 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_executable(pcap_processor src/pcap_processor.cpp)
+add_executable(main
+    src/main.cc
+    src/pcap_processor.cc
+    src/tops_processor.cc
+)
 
 find_library(PCAP_LIB pcap REQUIRED)
-target_link_libraries(pcap_processor PRIVATE ${PCAP_LIB})
+target_link_libraries(main PRIVATE ${PCAP_LIB})
