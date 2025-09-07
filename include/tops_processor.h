@@ -4,6 +4,5 @@
 class TopsProcessor : public PcapProcessor {
     public:
         TopsProcessor(std::string pcap_name);
-        void ProcessPacket(std::span<const u_char> view) override;
-
+        void ProcessPacket(std::span<const std::byte> view) override;
 };
