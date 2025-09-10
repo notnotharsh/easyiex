@@ -1,7 +1,4 @@
-#include <bits/stdc++.h>
-#include <pcap.h>
-
-#include "tops_processor.h"
+#include "processors/tops_processor.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {

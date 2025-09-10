@@ -8,8 +8,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(main
     src/main.cc
-    src/pcap_processor.cc
-    src/tops_processor.cc
+    src/processors/pcap_processor.cc
+    src/processors/tops_processor.cc
 )
 
 find_library(PCAP_LIB pcap REQUIRED)
