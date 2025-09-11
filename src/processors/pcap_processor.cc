@@ -1,5 +1,6 @@
 #include "processors/pcap_processor.h"
 #include "utils/endian_utils.h"
+#include "utils/time_utils.h"
 
 PcapProcessor::PcapProcessor(std::string pcap_name) : pcap_name_(pcap_name) {}
 
@@ -35,11 +36,9 @@ void PcapProcessor::InitialPass() {
 
         int iex_header_length = 40;
         int total_header_length = eth_header_length + ip_header_length + transport_header_length + iex_header_length;
-
-        int packet_size = pcap_header_->len - total_header_length;
         const std::byte *packet = data + total_header_length;
 
-        ProcessPacket(packet_size, packet);
+        ProcessPacket(packet);
     }
     pcap_close(pcap_handle_);
 }
