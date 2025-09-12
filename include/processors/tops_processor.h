@@ -4,9 +4,10 @@
 class TopsProcessor : public PcapProcessor {
     public:
         TopsProcessor(std::string pcap_name);
-        void ProcessPacket(const std::byte *packet) const override;
+        void ProcessPacket(const std::byte *packet) override;
     
     private:
+        bool active_hours_;
         enum class TopsMessageType : uint8_t {
             SystemEventMessage = 0x53,
             SecurityDirectoryMessage = 0x44,
@@ -20,4 +21,7 @@ class TopsProcessor : public PcapProcessor {
             TradeBreakMessage = 0x42,
             AuctionInformationMessage = 0x41
         };
+
+        void ProcessSystemEventMessage(const std::byte *packet) ;
+        void ProcessQuoteUpdateMessage(const std::byte *packet) ;
 };

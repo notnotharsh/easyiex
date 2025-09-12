@@ -10,6 +10,7 @@ add_executable(main
     src/main.cc
     src/processors/pcap_processor.cc
     src/processors/tops_processor.cc
+    src/utils/endian_utils.cc
     src/utils/time_utils.cc
 )
 

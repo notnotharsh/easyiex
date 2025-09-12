@@ -19,7 +19,7 @@ class PcapProcessor {
 
         PcapProcessor(std::string pcap_name);
         void InitialPass();
-        virtual void ProcessPacket(const std::byte *packet) const = 0;
+        virtual void ProcessPacket(const std::byte *packet) = 0;
         MessageInfo ProcessHeader(const std::byte *packet) const;
     
     private:

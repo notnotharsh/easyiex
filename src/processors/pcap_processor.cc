@@ -45,15 +45,15 @@ void PcapProcessor::InitialPass() {
 
 PcapProcessor::MessageInfo PcapProcessor::ProcessHeader(const std::byte *packet) const {
     MessageInfo info;
-    info.version = read_little_endian<uint8_t>(packet + 0);
-    info.reserved = read_little_endian<uint8_t>(packet + 1);
-    info.message_protocol_id = read_little_endian<uint16_t>(packet + 2);
-    info.channel_id = read_little_endian<uint32_t>(packet + 4);
-    info.session_id = read_little_endian<uint32_t>(packet + 8);
-    info.payload_length = read_little_endian<uint16_t>(packet + 12);
-    info.message_count = read_little_endian<uint16_t>(packet + 14);
-    info.stream_offset = read_little_endian<int64_t>(packet + 16);
-    info.first_message_sequence_number = read_little_endian<int64_t>(packet + 24);
-    info.timestamp = read_little_endian<int64_t>(packet + 32);
+    info.version = ReadLittleEndian<uint8_t>(packet + 0);
+    info.reserved = ReadLittleEndian<uint8_t>(packet + 1);
+    info.message_protocol_id = ReadLittleEndian<uint16_t>(packet + 2);
+    info.channel_id = ReadLittleEndian<uint32_t>(packet + 4);
+    info.session_id = ReadLittleEndian<uint32_t>(packet + 8);
+    info.payload_length = ReadLittleEndian<uint16_t>(packet + 12);
+    info.message_count = ReadLittleEndian<uint16_t>(packet + 14);
+    info.stream_offset = ReadLittleEndian<int64_t>(packet + 16);
+    info.first_message_sequence_number = ReadLittleEndian<int64_t>(packet + 24);
+    info.timestamp = ReadLittleEndian<int64_t>(packet + 32);
     return info;
 }
