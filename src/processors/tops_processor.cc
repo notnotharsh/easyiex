@@ -3,11 +3,11 @@
 
 TopsProcessor::TopsProcessor(std::string pcap_name) : PcapProcessor(pcap_name) {}
 
-void TopsProcessor::ProcessPacket(const std::byte *packet) {
-    int size = ReadLittleEndian<uint16_t>(packet); packet += 2;
-    uint8_t message_byte = ReadLittleEndian<uint8_t>(packet);
+void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
+    int size = ReadLittleEndian<uint16_t>(packet, 0);
+    uint8_t message_byte = ReadLittleEndian<uint8_t>(packet, 2);
 
-    if (static_cast<TopsMessageType>(message_byte) == TopsMessageType::SystemEventMessage) [[unlikely]] {
+    if (static_cast<TopsMessageType>(message_byte) == TopsMessageType::SystemEventMessage) {
         ProcessSystemEventMessage(packet);
         return;
     }
@@ -25,8 +25,9 @@ void TopsProcessor::ProcessPacket(const std::byte *packet) {
             break;
         case TopsMessageType::ShortSalePriceTestStatusMessage:
             break;
-        case TopsMessageType::QuoteUpdateMessage: [[likely]]
+        case TopsMessageType::QuoteUpdateMessage:
             ProcessQuoteUpdateMessage(packet);
+            break;
         case TopsMessageType::TradeReportMessage:
             break;
         case TopsMessageType::OfficialPriceMessage:
@@ -39,8 +40,8 @@ void TopsProcessor::ProcessPacket(const std::byte *packet) {
     }
 }
 
-void TopsProcessor::ProcessSystemEventMessage(const std::byte *packet) {
-    uint8_t system_event = ReadLittleEndian<uint8_t>(packet + 1);
+void TopsProcessor::ProcessSystemEventMessage(std::span<const std::byte> packet) {
+    uint8_t system_event = ReadLittleEndian<uint8_t>(packet, 3);
     switch (system_event) {
         case 0x52: 
             active_hours_ = true;
@@ -51,14 +52,16 @@ void TopsProcessor::ProcessSystemEventMessage(const std::byte *packet) {
     }
 }
 
-void TopsProcessor::ProcessQuoteUpdateMessage(const std::byte *packet) {
-    uint8_t message_type = ReadLittleEndian<uint8_t>(packet + 0);
-    uint8_t flags = ReadLittleEndian<uint8_t>(packet + 1);
-    uint64_t timestamp = ReadLittleEndian<int64_t>(packet + 2);
-    std::string symbol = Int64ToTicker(ReadLittleEndian<int64_t>(packet + 10));
+void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet) {
 
-    uint32_t bid_size = ReadLittleEndian<uint32_t>(packet + 18);
-    int64_t bid_price = ReadLittleEndian<int64_t>(packet + 22);
-    int64_t ask_price = ReadLittleEndian<int64_t>(packet + 30);
-    uint32_t ask_size = ReadLittleEndian<uint32_t>(packet + 38);
+    uint8_t message_type = ReadLittleEndian<uint8_t>(packet, 2);
+    uint8_t flags = ReadLittleEndian<uint8_t>(packet, 3);
+    uint64_t timestamp = ReadLittleEndian<int64_t>(packet, 4);
+    std::string symbol = Int64ToTicker(ReadLittleEndian<int64_t>(packet, 12));
+    uint32_t bid_size = ReadLittleEndian<uint32_t>(packet, 20);
+    int64_t bid_price = ReadLittleEndian<int64_t>(packet, 24);
+    int64_t ask_price = ReadLittleEndian<int64_t>(packet, 32);
+    uint32_t ask_size = ReadLittleEndian<uint32_t>(packet, 40);
+
+    std::cout << std::format("trade {} from {} to {}", symbol, bid_price, ask_price) << std::endl;
 }

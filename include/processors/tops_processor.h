@@ -4,7 +4,7 @@
 class TopsProcessor : public PcapProcessor {
     public:
         TopsProcessor(std::string pcap_name);
-        void ProcessPacket(const std::byte *packet) override;
+        void ProcessPacket(std::span<const std::byte> packet) override;
     
     private:
         bool active_hours_;
@@ -22,6 +22,6 @@ class TopsProcessor : public PcapProcessor {
             AuctionInformationMessage = 0x41
         };
 
-        void ProcessSystemEventMessage(const std::byte *packet) ;
-        void ProcessQuoteUpdateMessage(const std::byte *packet) ;
+        void ProcessSystemEventMessage(std::span<const std::byte> packet) ;
+        void ProcessQuoteUpdateMessage(std::span<const std::byte> packet) ;
 };

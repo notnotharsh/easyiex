@@ -8,16 +8,19 @@ void PcapProcessor::InitialPass() {
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_handle_ = pcap_open_offline(pcap_name_.c_str(), errbuf);
 
-    if (pcap_handle_ == NULL) {
+    if (!pcap_handle_) {
         throw std::ios_base::failure(errbuf);
     }
 
     while (pcap_next_ex(pcap_handle_, &pcap_header_, &pcap_data_) >= 0) {
 
-        const std::byte *data = reinterpret_cast<const std::byte*>(pcap_data_);
+        std::span<const std::byte> data{
+            reinterpret_cast<const std::byte*>(pcap_data_),
+            pcap_header_->len
+        };
 
         const int eth_header_length = 14;
-        if (pcap_header_->len <= eth_header_length) continue;
+        if (data.size() <= eth_header_length) continue;
 
         const std::byte first_ip_byte = data[eth_header_length];
         const int ip_header_length = static_cast<int>(first_ip_byte & static_cast<std::byte>(0x0F)) * 4;
@@ -32,28 +35,30 @@ void PcapProcessor::InitialPass() {
             transport_header_length = 8;
         } else throw std::runtime_error("protocol needs to be tcp or udp");
 
-        MessageInfo info = ProcessHeader(data + eth_header_length + ip_header_length + transport_header_length);
-
         int iex_header_length = 40;
         int total_header_length = eth_header_length + ip_header_length + transport_header_length + iex_header_length;
-        const std::byte *packet = data + total_header_length;
 
+        std::span<const std::byte> iex_header = data.subspan(eth_header_length + ip_header_length + transport_header_length, iex_header_length);
+        MessageInfo info = ProcessHeader(iex_header);
+        
+        if (data.size() <= total_header_length) continue;
+        std::span<const std::byte> packet = data.subspan(total_header_length);
         ProcessPacket(packet);
     }
     pcap_close(pcap_handle_);
 }
 
-PcapProcessor::MessageInfo PcapProcessor::ProcessHeader(const std::byte *packet) const {
+PcapProcessor::MessageInfo PcapProcessor::ProcessHeader(std::span<const std::byte> packet) const {
     MessageInfo info;
-    info.version = ReadLittleEndian<uint8_t>(packet + 0);
-    info.reserved = ReadLittleEndian<uint8_t>(packet + 1);
-    info.message_protocol_id = ReadLittleEndian<uint16_t>(packet + 2);
-    info.channel_id = ReadLittleEndian<uint32_t>(packet + 4);
-    info.session_id = ReadLittleEndian<uint32_t>(packet + 8);
-    info.payload_length = ReadLittleEndian<uint16_t>(packet + 12);
-    info.message_count = ReadLittleEndian<uint16_t>(packet + 14);
-    info.stream_offset = ReadLittleEndian<int64_t>(packet + 16);
-    info.first_message_sequence_number = ReadLittleEndian<int64_t>(packet + 24);
-    info.timestamp = ReadLittleEndian<int64_t>(packet + 32);
+    info.version = ReadLittleEndian<uint8_t>(packet, 0);
+    info.reserved = ReadLittleEndian<uint8_t>(packet, 1);
+    info.message_protocol_id = ReadLittleEndian<uint16_t>(packet, 2);
+    info.channel_id = ReadLittleEndian<uint32_t>(packet, 4);
+    info.session_id = ReadLittleEndian<uint32_t>(packet, 8);
+    info.payload_length = ReadLittleEndian<uint16_t>(packet, 12);
+    info.message_count = ReadLittleEndian<uint16_t>(packet, 14);
+    info.stream_offset = ReadLittleEndian<int64_t>(packet, 16);
+    info.first_message_sequence_number = ReadLittleEndian<int64_t>(packet, 24);
+    info.timestamp = ReadLittleEndian<int64_t>(packet, 32);
     return info;
 }
