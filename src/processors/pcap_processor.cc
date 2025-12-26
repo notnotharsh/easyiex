@@ -46,6 +46,7 @@ void PcapProcessor::InitialPass() {
         ProcessPacket(packet);
     }
     pcap_close(pcap_handle_);
+    WriteToParquet();
 }
 
 PcapProcessor::MessageInfo PcapProcessor::ProcessHeader(std::span<const std::byte> packet) const {

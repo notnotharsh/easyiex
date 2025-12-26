@@ -1,5 +1,6 @@
 #include "processors/tops_processor.h"
 #include "utils/endian_utils.h"
+#include "utils/structures.h"
 
 TopsProcessor::TopsProcessor(std::string pcap_name) : PcapProcessor(pcap_name) {}
 
@@ -63,5 +64,18 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
     int64_t ask_price = ReadLittleEndian<int64_t>(packet, 32);
     uint32_t ask_size = ReadLittleEndian<uint32_t>(packet, 40);
 
-    std::cout << std::format("trade {} from {} to {}", symbol, bid_price, ask_price) << std::endl;
+    QuoteUpdate row {
+        .timestamp = timestamp,
+        .bid_size = bid_size,
+        .bid_price = bid_price,
+        .ask_price = ask_price,
+        .ask_size = ask_size
+    };
+    
+    QuoteUpdateTableBuilder& builder = quote_update_context.GetOrCreate(symbol);
+    builder.AddRow(row);
+}
+
+void TopsProcessor::WriteToParquet() {
+    quote_update_context.WriteAllBuilders();
 }

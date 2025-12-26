@@ -1,10 +1,12 @@
 #pragma once
 #include "processors/pcap_processor.h"
+#include "persistence/quote_update_table_builder_manager.h"
 
 class TopsProcessor : public PcapProcessor {
     public:
         TopsProcessor(std::string pcap_name);
         void ProcessPacket(std::span<const std::byte> packet) override;
+        void WriteToParquet() override;
     
     private:
         bool active_hours_;
@@ -22,6 +24,8 @@ class TopsProcessor : public PcapProcessor {
             AuctionInformationMessage = 0x41
         };
 
-        void ProcessSystemEventMessage(std::span<const std::byte> packet) ;
-        void ProcessQuoteUpdateMessage(std::span<const std::byte> packet) ;
+        QuoteUpdateTableBuilderManager quote_update_context;
+
+        void ProcessSystemEventMessage(std::span<const std::byte> packet);
+        void ProcessQuoteUpdateMessage(std::span<const std::byte> packet);
 };
