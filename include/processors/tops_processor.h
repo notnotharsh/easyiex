@@ -1,6 +1,6 @@
 #pragma once
 #include "processors/pcap_processor.h"
-#include "persistence/quote_update_table_builder_manager.h"
+#include "persistence/quote_update_table_builder.h"
 
 class TopsProcessor : public PcapProcessor {
     public:
@@ -24,7 +24,7 @@ class TopsProcessor : public PcapProcessor {
             AuctionInformationMessage = 0x41
         };
 
-        QuoteUpdateTableBuilderManager quote_update_context;
+        QuoteUpdateTableBuilder quote_update_table_builder;
 
         void ProcessSystemEventMessage(std::span<const std::byte> packet);
         void ProcessQuoteUpdateMessage(std::span<const std::byte> packet);

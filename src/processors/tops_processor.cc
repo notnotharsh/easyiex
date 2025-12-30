@@ -1,5 +1,6 @@
 #include "processors/tops_processor.h"
 #include "utils/endian_utils.h"
+#include "utils/time_utils.h"
 #include "utils/structures.h"
 
 TopsProcessor::TopsProcessor(std::string pcap_name) : PcapProcessor(pcap_name) {}
@@ -72,10 +73,9 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
         .ask_size = ask_size
     };
     
-    QuoteUpdateTableBuilder& builder = quote_update_context.GetOrCreate(symbol);
-    builder.AddRow(row);
+    quote_update_table_builder.AddRow(row);
 }
 
 void TopsProcessor::WriteToParquet() {
-    quote_update_context.WriteAllBuilders();
+    quote_update_table_builder.WriteToParquet();
 }

@@ -14,7 +14,6 @@ add_executable(main
     src/utils/endian_utils.cc
     src/utils/time_utils.cc
     src/persistence/quote_update_table_builder.cc
-    src/persistence/quote_update_table_builder_manager.cc
 )
 
 find_library(PCAP_LIB pcap REQUIRED)

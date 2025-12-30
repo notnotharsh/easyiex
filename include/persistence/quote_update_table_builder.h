@@ -11,7 +11,6 @@
 class QuoteUpdateTableBuilder {
     public:
         QuoteUpdateTableBuilder() = default;
-        QuoteUpdateTableBuilder(const std::string& symbol);
         void AddRow(const QuoteUpdate& row);
         void WriteToParquet();
     private:
@@ -26,8 +25,8 @@ class QuoteUpdateTableBuilder {
             }
         );
 
-        std::string symbol;
         arrow::UInt64Builder timestamps_builder;
+        arrow::StringBuilder symbols_builder;
         arrow::UInt32Builder bid_sizes_builder;
         arrow::Int64Builder bid_prices_builder;
         arrow::Int64Builder ask_prices_builder;
