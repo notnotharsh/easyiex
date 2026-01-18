@@ -65,8 +65,22 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
     int64_t ask_price = ReadLittleEndian<int64_t>(packet, 32);
     uint32_t ask_size = ReadLittleEndian<uint32_t>(packet, 40);
 
+    uint16_t symbol_id;
+    if (ids_to_symbols.size() >= std::numeric_limits<uint16_t>::max()) {
+        throw std::runtime_error("symbol dictionary overflow");
+    }
+
+    if (symbols_to_ids.count(symbol)) {
+        symbol_id = symbols_to_ids[symbol];
+    } else {
+        symbol_id = static_cast<uint16_t>(ids_to_symbols.size());
+        ids_to_symbols.push_back(symbol);
+        symbols_to_ids.insert({symbol, symbol_id});
+    }
+
     QuoteUpdate row {
         .timestamp = timestamp,
+        .symbol_id = symbol_id,
         .bid_size = bid_size,
         .bid_price = bid_price,
         .ask_price = ask_price,
@@ -77,5 +91,5 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
 }
 
 void TopsProcessor::WriteToParquet() {
-    quote_update_table_builder.WriteToParquet();
+    quote_update_table_builder.WriteToParquet(ids_to_symbols);
 }

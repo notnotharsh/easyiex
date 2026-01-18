@@ -12,12 +12,12 @@ class QuoteUpdateTableBuilder {
     public:
         QuoteUpdateTableBuilder() = default;
         void AddRow(const QuoteUpdate& row);
-        void WriteToParquet();
+        void WriteToParquet(const std::vector<std::string>& ids_to_symbols);
     private:
         std::shared_ptr<arrow::Schema> schema = arrow::schema(
             {
                 arrow::field("timestamp", arrow::uint64()),
-                arrow::field("symbol", arrow::utf8()),
+                arrow::field("symbol", arrow::dictionary(arrow::uint16(), arrow::utf8())),
                 arrow::field("bid_size", arrow::uint32()),
                 arrow::field("bid_price", arrow::int64()),
                 arrow::field("ask_price", arrow::int64()),
@@ -26,7 +26,7 @@ class QuoteUpdateTableBuilder {
         );
 
         arrow::UInt64Builder timestamps_builder;
-        arrow::StringBuilder symbols_builder;
+        arrow::UInt16Builder symbol_ids_builder;
         arrow::UInt32Builder bid_sizes_builder;
         arrow::Int64Builder bid_prices_builder;
         arrow::Int64Builder ask_prices_builder;

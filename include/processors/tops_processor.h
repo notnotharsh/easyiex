@@ -26,6 +26,9 @@ class TopsProcessor : public PcapProcessor {
 
         QuoteUpdateTableBuilder quote_update_table_builder;
 
+        std::unordered_map<std::string, uint16_t> symbols_to_ids;
+        std::vector<std::string> ids_to_symbols;
+
         void ProcessSystemEventMessage(std::span<const std::byte> packet);
         void ProcessQuoteUpdateMessage(std::span<const std::byte> packet);
 };

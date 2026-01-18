@@ -3,7 +3,7 @@
 
 struct QuoteUpdate {
     uint64_t timestamp;
-    std::string symbol;
+    uint16_t symbol_id;
     uint32_t bid_size;
     int64_t bid_price;
     int64_t ask_price;
