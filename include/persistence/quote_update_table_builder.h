@@ -10,10 +10,20 @@
 
 class QuoteUpdateTableBuilder {
     public:
-        QuoteUpdateTableBuilder() = default;
+        QuoteUpdateTableBuilder(const std::vector<std::string>& ids_to_symbols,
+                                const std::string& filename,
+                                size_t flush_threshold = 1'000'000);
         void AddRow(const QuoteUpdate& row);
-        void WriteToParquet(const std::vector<std::string>& ids_to_symbols);
+        void Close();
     private:
+        void Flush();
+        void OpenWriter();
+
+        const std::vector<std::string>& ids_to_symbols_;
+        std::string filename_;
+        size_t flush_threshold_;
+        size_t row_count_ = 0;
+
         std::shared_ptr<arrow::Schema> schema = arrow::schema(
             {
                 arrow::field("timestamp", arrow::uint64()),
@@ -31,4 +41,7 @@ class QuoteUpdateTableBuilder {
         arrow::Int64Builder bid_prices_builder;
         arrow::Int64Builder ask_prices_builder;
         arrow::UInt32Builder ask_sizes_builder;
+
+        std::shared_ptr<arrow::io::FileOutputStream> outfile_;
+        std::unique_ptr<parquet::arrow::FileWriter> writer_;
 };

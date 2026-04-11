@@ -3,7 +3,9 @@
 #include "utils/time_utils.h"
 #include "utils/structures.h"
 
-TopsProcessor::TopsProcessor(std::string pcap_name) : PcapProcessor(pcap_name) {}
+TopsProcessor::TopsProcessor(std::string pcap_name)
+    : PcapProcessor(pcap_name)
+    , quote_update_table_builder(ids_to_symbols, "data.parquet") {}
 
 void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
     int size = ReadLittleEndian<uint16_t>(packet, 0);
@@ -91,5 +93,5 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
 }
 
 void TopsProcessor::WriteToParquet() {
-    quote_update_table_builder.WriteToParquet(ids_to_symbols);
+    quote_update_table_builder.Close();
 }
