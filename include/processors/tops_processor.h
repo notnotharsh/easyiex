@@ -2,11 +2,11 @@
 #include "processors/pcap_processor.h"
 #include "persistence/quote_update_table_builder.h"
 
-class TopsProcessor : public PcapProcessor {
+class TopsProcessor : public PcapProcessor<TopsProcessor> {
     public:
         TopsProcessor(std::string pcap_name);
-        void ProcessPacket(std::span<const std::byte> packet) override;
-        void WriteToParquet() override;
+        void ProcessPacket(std::span<const std::byte> packet);
+        void WriteToParquet();
 
     private:
         bool active_hours_;
