@@ -9,7 +9,7 @@ class TopsProcessor : public PcapProcessor<TopsProcessor> {
         void WriteToParquet();
 
     private:
-        bool active_hours_;
+        bool active_hours_ = false;
         enum class TopsMessageType : uint8_t {
             SystemEventMessage = 0x53,
             SecurityDirectoryMessage = 0x44,

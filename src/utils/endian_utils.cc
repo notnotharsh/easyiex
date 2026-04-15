@@ -7,6 +7,6 @@ std::string Int64ToTicker(int64_t value) {
         result[i] = static_cast<char>(byte);
     }
 
-    while (result.back() == ' ') result.pop_back();
+    while (!result.empty() && result.back() == ' ') result.pop_back();
     return result;
 }
