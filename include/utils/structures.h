@@ -9,3 +9,12 @@ struct QuoteUpdate {
     int64_t ask_price;
     uint32_t ask_size;
 };
+
+struct QuoteUpdateMsg {
+    uint64_t timestamp;
+    int64_t  raw_symbol;
+    uint32_t bid_size;
+    int64_t  bid_price;
+    int64_t  ask_price;
+    uint32_t ask_size;
+};
