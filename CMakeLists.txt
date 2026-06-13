@@ -11,11 +11,13 @@ add_executable(main
     include/utils/structures.h
     include/utils/worker_pool.h
     include/processors/tops_workers/quote_update_worker.h
+    include/processors/tops_workers/trade_report_worker.h
     src/main.cc
     src/processors/tops_processor.cc
     src/utils/endian_utils.cc
     src/utils/time_utils.cc
     src/persistence/quote_update_table_builder.cc
+    src/persistence/trade_report_table_builder.cc
 )
 
 find_library(PCAP_LIB pcap REQUIRED)

@@ -23,7 +23,9 @@ void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
         case TopsMessageType::QuoteUpdateMessage:
             ProcessQuoteUpdateMessage(packet);
             break;
-        case TopsMessageType::TradeReportMessage:                 break;
+        case TopsMessageType::TradeReportMessage:
+            ProcessTradeReportMessage(packet);
+            break;
         case TopsMessageType::OfficialPriceMessage:               break;
         case TopsMessageType::TradeBreakMessage:                  break;
         case TopsMessageType::AuctionInformationMessage:          break;
@@ -51,6 +53,19 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
     });
 }
 
+void TopsProcessor::ProcessTradeReportMessage(std::span<const std::byte> packet) {
+    int64_t raw_symbol = ReadLittleEndian<int64_t>(packet, 12);
+    trade_pool_.Dispatch(raw_symbol, TradeReportMsg{
+        .timestamp            = ReadLittleEndian<uint64_t>(packet, 4),
+        .raw_symbol           = raw_symbol,
+        .size                 = ReadLittleEndian<uint32_t>(packet, 20),
+        .price                = ReadLittleEndian<int64_t>(packet, 24),
+        .trade_id             = ReadLittleEndian<int64_t>(packet, 32),
+        .sale_condition_flags = ReadLittleEndian<uint8_t>(packet, 3),
+    });
+}
+
 void TopsProcessor::WriteToParquet() {
     quote_pool_.Close();
+    trade_pool_.Close();
 }

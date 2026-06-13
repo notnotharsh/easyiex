@@ -2,6 +2,7 @@
 #include "processors/pcap_processor.h"
 #include "utils/worker_pool.h"
 #include "processors/tops_workers/quote_update_worker.h"
+#include "processors/tops_workers/trade_report_worker.h"
 
 class TopsProcessor : public PcapProcessor<TopsProcessor> {
 public:
@@ -26,7 +27,9 @@ private:
     };
 
     WorkerPool<QuoteUpdateWorker, QuoteUpdateMsg> quote_pool_;
+    WorkerPool<TradeReportWorker, TradeReportMsg> trade_pool_;
 
     void ProcessSystemEventMessage(std::span<const std::byte> packet);
     void ProcessQuoteUpdateMessage(std::span<const std::byte> packet);
+    void ProcessTradeReportMessage(std::span<const std::byte> packet);
 };

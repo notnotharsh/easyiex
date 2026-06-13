@@ -18,3 +18,21 @@ struct QuoteUpdateMsg {
     int64_t  ask_price;
     uint32_t ask_size;
 };
+
+struct TradeReport {
+    uint64_t timestamp;
+    uint16_t symbol_id;
+    uint32_t size;
+    int64_t  price;
+    int64_t  trade_id;
+    uint8_t  sale_condition_flags;
+};
+
+struct TradeReportMsg {
+    uint64_t timestamp;
+    int64_t  raw_symbol;
+    uint32_t size;
+    int64_t  price;
+    int64_t  trade_id;
+    uint8_t  sale_condition_flags;
+};
