@@ -9,6 +9,7 @@ public:
         : builder_(ids_to_symbols_, filename_prefix + std::to_string(shard_idx) + ".parquet") {}
 
     void Close() { builder_.Close(); }
+    const std::vector<std::string>& Symbols() const { return ids_to_symbols_; }
 
 protected:
     uint16_t ResolveSymbol(int64_t raw_symbol) {

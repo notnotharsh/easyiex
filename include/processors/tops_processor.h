@@ -26,9 +26,12 @@ private:
         AuctionInformationMessage = 0x41
     };
 
+    std::string output_dir_;
     WorkerPool<QuoteUpdateWorker, QuoteUpdateMsg> quote_pool_;
     WorkerPool<TradeReportWorker, TradeReportMsg> trade_pool_;
 
+    static std::string SetupOutputDir(const std::string& pcap_name);
+    void WriteShardMap() const;
     void ProcessSystemEventMessage(std::span<const std::byte> packet);
     void ProcessQuoteUpdateMessage(std::span<const std::byte> packet);
     void ProcessTradeReportMessage(std::span<const std::byte> packet);

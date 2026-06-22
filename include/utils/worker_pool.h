@@ -7,9 +7,10 @@ class WorkerPool {
     static constexpr size_t kQueueCapacity = 1 << 16;
 
 public:
-    explicit WorkerPool(int n_workers = std::max(1u, std::thread::hardware_concurrency())) {
+    explicit WorkerPool(std::string base_path,
+                        int n_workers = std::max(1u, std::thread::hardware_concurrency())) {
         for (int i = 0; i < n_workers; ++i)
-            shards_.push_back(std::make_unique<Shard>(i));
+            shards_.push_back(std::make_unique<Shard>(i, base_path));
         for (auto& s : shards_)
             s->thread = std::thread([p = s.get()] {
                 MsgT msg;
@@ -38,13 +39,19 @@ public:
         for (auto& s : shards_) if (s->thread.joinable()) s->thread.join();
     }
 
+    template<typename Fn>
+    void ForEachWorker(Fn&& fn) const {
+        for (size_t i = 0; i < shards_.size(); ++i)
+            fn(static_cast<int>(i), shards_[i]->worker);
+    }
+
 private:
     struct Shard {
         WorkerT worker;
         boost::lockfree::spsc_queue<MsgT, boost::lockfree::capacity<kQueueCapacity>> queue;
         std::thread thread;
         std::atomic<bool> done{false};
-        explicit Shard(int idx) : worker(idx) {}
+        Shard(int idx, const std::string& base_path) : worker(idx, base_path) {}
     };
 
     std::vector<std::unique_ptr<Shard>> shards_;

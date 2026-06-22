@@ -4,8 +4,8 @@
 
 class TradeReportWorker : public SymbolDictWorker<TradeReportTableBuilder> {
 public:
-    explicit TradeReportWorker(int shard_idx)
-        : SymbolDictWorker(shard_idx, "data_trades_") {}
+    TradeReportWorker(int shard_idx, const std::string& base_path)
+        : SymbolDictWorker(shard_idx, base_path) {}
 
     void Process(const TradeReportMsg& msg) {
         builder_.AddRow({msg.timestamp, ResolveSymbol(msg.raw_symbol), msg.size, msg.price, msg.trade_id, msg.sale_condition_flags});

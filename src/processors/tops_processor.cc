@@ -1,8 +1,21 @@
 #include "processors/tops_processor.h"
 #include "utils/endian_utils.h"
+#include <filesystem>
+#include <fstream>
+
+std::string TopsProcessor::SetupOutputDir(const std::string& pcap_name) {
+    namespace fs = std::filesystem;
+    std::string out = "output/" + fs::path(pcap_name).stem().string();
+    fs::create_directories(out + "/quotes");
+    fs::create_directories(out + "/trades");
+    return out;
+}
 
 TopsProcessor::TopsProcessor(std::string pcap_name)
-    : PcapProcessor(pcap_name) {}
+    : PcapProcessor(pcap_name)
+    , output_dir_(SetupOutputDir(pcap_name))
+    , quote_pool_(output_dir_ + "/quotes/quotes_")
+    , trade_pool_(output_dir_ + "/trades/trades_") {}
 
 void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
     uint8_t message_byte = ReadLittleEndian<uint8_t>(packet, 2);
@@ -65,7 +78,29 @@ void TopsProcessor::ProcessTradeReportMessage(std::span<const std::byte> packet)
     });
 }
 
+void TopsProcessor::WriteShardMap() const {
+    std::ofstream f(output_dir_ + "/shard_map.json");
+    f << "{\n  \"quotes\": {";
+    bool first = true;
+    quote_pool_.ForEachWorker([&](int shard, const QuoteUpdateWorker& w) {
+        for (const auto& sym : w.Symbols()) {
+            f << (first ? "\n" : ",\n") << "    \"" << sym << "\": " << shard;
+            first = false;
+        }
+    });
+    f << "\n  },\n  \"trades\": {";
+    first = true;
+    trade_pool_.ForEachWorker([&](int shard, const TradeReportWorker& w) {
+        for (const auto& sym : w.Symbols()) {
+            f << (first ? "\n" : ",\n") << "    \"" << sym << "\": " << shard;
+            first = false;
+        }
+    });
+    f << "\n  }\n}\n";
+}
+
 void TopsProcessor::WriteToParquet() {
     quote_pool_.Close();
     trade_pool_.Close();
+    WriteShardMap();
 }

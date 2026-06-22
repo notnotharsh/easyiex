@@ -4,8 +4,8 @@
 
 class QuoteUpdateWorker : public SymbolDictWorker<QuoteUpdateTableBuilder> {
 public:
-    explicit QuoteUpdateWorker(int shard_idx)
-        : SymbolDictWorker(shard_idx, "data_quotes_") {}
+    QuoteUpdateWorker(int shard_idx, const std::string& base_path)
+        : SymbolDictWorker(shard_idx, base_path) {}
 
     void Process(const QuoteUpdateMsg& msg) {
         builder_.AddRow({msg.timestamp, ResolveSymbol(msg.raw_symbol), msg.bid_size, msg.bid_price, msg.ask_price, msg.ask_size});
