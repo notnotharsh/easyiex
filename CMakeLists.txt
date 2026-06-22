@@ -36,3 +36,15 @@ target_link_libraries(main PRIVATE Boost::boost)
 
 find_package(Threads REQUIRED)
 target_link_libraries(main PRIVATE Threads::Threads)
+
+enable_testing()
+find_package(GTest REQUIRED)
+include(GoogleTest)
+
+add_executable(easyiex_tests
+    tests/test_endian_utils.cc
+    tests/test_symbol_dict_worker.cc
+    src/utils/endian_utils.cc
+)
+target_link_libraries(easyiex_tests PRIVATE GTest::gtest GTest::gtest_main Threads::Threads)
+gtest_discover_tests(easyiex_tests)
