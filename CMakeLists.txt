@@ -10,6 +10,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(main
     include/utils/structures.h
     include/utils/worker_pool.h
+    include/persistence/table_builder_base.h
+    include/processors/tops_workers/symbol_dict_worker.h
     include/processors/tops_workers/quote_update_worker.h
     include/processors/tops_workers/trade_report_worker.h
     src/main.cc
