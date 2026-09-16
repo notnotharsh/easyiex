@@ -1,4 +1,8 @@
 #include <gtest/gtest.h>
+
+#include <array>
+#include <limits>
+
 #include "utils/endian_utils.h"
 
 TEST(ReadLittleEndian, Uint8SingleByte) {

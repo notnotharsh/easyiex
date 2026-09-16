@@ -1,7 +1,9 @@
 #include "processors/tops_processor.h"
 #include "utils/endian_utils.h"
+
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 
 std::string TopsProcessor::SetupOutputDir(const std::string& pcap_name) {
     namespace fs = std::filesystem;

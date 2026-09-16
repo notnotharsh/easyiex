@@ -1,5 +1,14 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include <boost/lockfree/spsc_queue.hpp>
 
 template<typename WorkerT, typename MsgT>

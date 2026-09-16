@@ -1,5 +1,5 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <cstdint>
 
 struct QuoteUpdate {
     uint64_t timestamp;

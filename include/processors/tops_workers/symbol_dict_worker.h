@@ -1,5 +1,12 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "utils/endian_utils.h"
 
 template<typename BuilderT>

@@ -1,5 +1,11 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <cstddef>
+#include <cstdint>
+#include <ios>
+#include <span>
+#include <stdexcept>
+#include <string>
+
 #include <pcap.h>
 
 #include "utils/endian_utils.h"

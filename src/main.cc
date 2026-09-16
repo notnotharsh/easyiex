@@ -1,5 +1,8 @@
 #include "processors/tops_processor.h"
 
+#include <stdexcept>
+#include <string>
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         throw std::invalid_argument("usage: pcap_processor [pcap file]");

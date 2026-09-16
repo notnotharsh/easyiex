@@ -1,5 +1,9 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <string>
+#include <type_traits>
 
 template <typename T>
 static constexpr T ReadLittleEndian(std::span<const std::byte> p) {

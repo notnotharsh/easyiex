@@ -1,5 +1,8 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <arrow/api.h>
 #include <arrow/io/api.h>
