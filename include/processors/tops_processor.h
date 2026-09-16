@@ -3,6 +3,7 @@
 #include "utils/worker_pool.h"
 #include "processors/tops_workers/quote_update_worker.h"
 #include "processors/tops_workers/trade_report_worker.h"
+#include "processors/tops_workers/trade_break_worker.h"
 
 class TopsProcessor : public PcapProcessor<TopsProcessor> {
 public:
@@ -29,10 +30,12 @@ private:
     std::string output_dir_;
     WorkerPool<QuoteUpdateWorker, QuoteUpdateMsg> quote_pool_;
     WorkerPool<TradeReportWorker, TradeReportMsg> trade_pool_;
+    WorkerPool<TradeBreakWorker, TradeBreakMsg> break_pool_;
 
     static std::string SetupOutputDir(const std::string& pcap_name);
     void WriteShardMap() const;
     void ProcessSystemEventMessage(std::span<const std::byte> packet);
     void ProcessQuoteUpdateMessage(std::span<const std::byte> packet);
     void ProcessTradeReportMessage(std::span<const std::byte> packet);
+    void ProcessTradeBreakMessage(std::span<const std::byte> packet);
 };

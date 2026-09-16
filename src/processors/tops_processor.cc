@@ -10,6 +10,7 @@ std::string TopsProcessor::SetupOutputDir(const std::string& pcap_name) {
     std::string out = "output/" + fs::path(pcap_name).stem().string();
     fs::create_directories(out + "/quotes");
     fs::create_directories(out + "/trades");
+    fs::create_directories(out + "/breaks");
     return out;
 }
 
@@ -17,7 +18,8 @@ TopsProcessor::TopsProcessor(std::string pcap_name)
     : PcapProcessor(pcap_name)
     , output_dir_(SetupOutputDir(pcap_name))
     , quote_pool_(output_dir_ + "/quotes/quotes_")
-    , trade_pool_(output_dir_ + "/trades/trades_") {}
+    , trade_pool_(output_dir_ + "/trades/trades_")
+    , break_pool_(output_dir_ + "/breaks/breaks_") {}
 
 void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
     uint8_t message_byte = ReadLittleEndian<uint8_t>(packet, 2);
@@ -42,7 +44,9 @@ void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
             ProcessTradeReportMessage(packet);
             break;
         case TopsMessageType::OfficialPriceMessage:               break;
-        case TopsMessageType::TradeBreakMessage:                  break;
+        case TopsMessageType::TradeBreakMessage:
+            ProcessTradeBreakMessage(packet);
+            break;
         case TopsMessageType::AuctionInformationMessage:          break;
         default: std::cout << message_byte << std::endl;
     }
@@ -80,6 +84,18 @@ void TopsProcessor::ProcessTradeReportMessage(std::span<const std::byte> packet)
     });
 }
 
+void TopsProcessor::ProcessTradeBreakMessage(std::span<const std::byte> packet) {
+    int64_t raw_symbol = ReadLittleEndian<int64_t>(packet, 12);
+    break_pool_.Dispatch(raw_symbol, TradeBreakMsg{
+        .timestamp            = ReadLittleEndian<uint64_t>(packet, 4),
+        .raw_symbol           = raw_symbol,
+        .size                 = ReadLittleEndian<uint32_t>(packet, 20),
+        .price                = ReadLittleEndian<int64_t>(packet, 24),
+        .trade_id             = ReadLittleEndian<int64_t>(packet, 32),
+        .sale_condition_flags = ReadLittleEndian<uint8_t>(packet, 3),
+    });
+}
+
 void TopsProcessor::WriteShardMap() const {
     std::ofstream f(output_dir_ + "/shard_map.json");
     f << "{\n  \"quotes\": {";
@@ -98,11 +114,20 @@ void TopsProcessor::WriteShardMap() const {
             first = false;
         }
     });
+    f << "\n  },\n  \"breaks\": {";
+    first = true;
+    break_pool_.ForEachWorker([&](int shard, const TradeBreakWorker& w) {
+        for (const auto& sym : w.Symbols()) {
+            f << (first ? "\n" : ",\n") << "    \"" << sym << "\": " << shard;
+            first = false;
+        }
+    });
     f << "\n  }\n}\n";
 }
 
 void TopsProcessor::WriteToParquet() {
     quote_pool_.Close();
     trade_pool_.Close();
+    break_pool_.Close();
     WriteShardMap();
 }
