@@ -67,8 +67,17 @@ class PcapProcessor {
                 MessageInfo info = ProcessHeader(iex_header);
 
                 if (data.size() <= total_header_length) continue;
-                std::span<const std::byte> packet = data.subspan(total_header_length);
-                static_cast<Derived*>(this)->ProcessPacket(packet);
+                std::span<const std::byte> payload = data.subspan(total_header_length);
+                size_t offset = 0;
+                size_t block_idx = 0;
+                while (block_idx < info.message_count && offset + 2 <= payload.size()) {
+                    uint16_t message_length = ReadLittleEndian<uint16_t>(payload, offset);
+                    if (message_length == 0 || offset + 2 + message_length > payload.size()) break;
+                    std::span<const std::byte> block = payload.subspan(offset, size_t{2} + message_length);
+                    static_cast<Derived*>(this)->ProcessPacket(block);
+                    offset += size_t{2} + message_length;
+                    block_idx++;
+                }
             }
             pcap_close(pcap_handle_);
             static_cast<Derived*>(this)->WriteToParquet();
