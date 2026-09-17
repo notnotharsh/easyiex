@@ -12,7 +12,12 @@ public:
     void WriteToParquet();
 
 private:
-    bool active_hours_ = false;
+    enum class MarketSession : uint8_t {
+        PreMarket  = 0,
+        Regular    = 1,
+        PostMarket = 2
+    };
+    MarketSession session_ = MarketSession::PreMarket;
     enum class TopsMessageType : uint8_t {
         SystemEventMessage = 0x53,
         SecurityDirectoryMessage = 0x44,

@@ -19,7 +19,8 @@ private:
         arrow::field("size",                  arrow::uint32()),
         arrow::field("price",                 arrow::int64()),
         arrow::field("trade_id",              arrow::int64()),
-        arrow::field("sale_condition_flags",  arrow::uint8())
+        arrow::field("sale_condition_flags",  arrow::uint8()),
+        arrow::field("session",               arrow::uint8())
     });
 
     arrow::UInt64Builder timestamps_builder_;
@@ -28,4 +29,5 @@ private:
     arrow::Int64Builder  prices_builder_;
     arrow::Int64Builder  trade_ids_builder_;
     arrow::UInt8Builder  sale_condition_flags_builder_;
+    arrow::UInt8Builder  session_builder_;
 };

@@ -19,7 +19,9 @@ private:
         arrow::field("bid_size",  arrow::uint32()),
         arrow::field("bid_price", arrow::int64()),
         arrow::field("ask_price", arrow::int64()),
-        arrow::field("ask_size",  arrow::uint32())
+        arrow::field("ask_size",  arrow::uint32()),
+        arrow::field("flags",     arrow::uint8()),
+        arrow::field("session",   arrow::uint8())
     });
 
     arrow::UInt64Builder timestamps_builder_;
@@ -28,4 +30,6 @@ private:
     arrow::Int64Builder  bid_prices_builder_;
     arrow::Int64Builder  ask_prices_builder_;
     arrow::UInt32Builder ask_sizes_builder_;
+    arrow::UInt8Builder  flags_builder_;
+    arrow::UInt8Builder  session_builder_;
 };

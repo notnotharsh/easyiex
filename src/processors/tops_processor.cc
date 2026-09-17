@@ -29,8 +29,6 @@ void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
         return;
     }
 
-    if (!active_hours_) return;
-
     switch (static_cast<TopsMessageType>(message_byte)) {
         case TopsMessageType::SecurityDirectoryMessage:           break;
         case TopsMessageType::TradingStatusMessage:               break;
@@ -55,8 +53,11 @@ void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
 void TopsProcessor::ProcessSystemEventMessage(std::span<const std::byte> packet) {
     uint8_t system_event = ReadLittleEndian<uint8_t>(packet, 3);
     switch (system_event) {
-        case 0x52: active_hours_ = true;  break;
-        case 0x4d: active_hours_ = false; break;
+        case 0x53: session_ = MarketSession::PreMarket;  break;  // 'S' Start of System Hours
+        case 0x52: session_ = MarketSession::Regular;    break;  // 'R' Start of Regular Market Hours
+        case 0x4d: session_ = MarketSession::PostMarket; break;  // 'M' End of Regular Market Hours
+        case 0x45: session_ = MarketSession::PostMarket; break;  // 'E' End of System Hours
+        case 0x43: session_ = MarketSession::PostMarket; break;  // 'C' End of Messages
     }
 }
 
@@ -69,6 +70,8 @@ void TopsProcessor::ProcessQuoteUpdateMessage(std::span<const std::byte> packet)
         .bid_price  = ReadLittleEndian<int64_t>(packet, 24),
         .ask_price  = ReadLittleEndian<int64_t>(packet, 32),
         .ask_size   = ReadLittleEndian<uint32_t>(packet, 40),
+        .flags      = ReadLittleEndian<uint8_t>(packet, 3),
+        .session    = static_cast<uint8_t>(session_),
     });
 }
 
@@ -81,6 +84,7 @@ void TopsProcessor::ProcessTradeReportMessage(std::span<const std::byte> packet)
         .price                = ReadLittleEndian<int64_t>(packet, 24),
         .trade_id             = ReadLittleEndian<int64_t>(packet, 32),
         .sale_condition_flags = ReadLittleEndian<uint8_t>(packet, 3),
+        .session              = static_cast<uint8_t>(session_),
     });
 }
 
@@ -93,6 +97,7 @@ void TopsProcessor::ProcessTradeBreakMessage(std::span<const std::byte> packet) 
         .price                = ReadLittleEndian<int64_t>(packet, 24),
         .trade_id             = ReadLittleEndian<int64_t>(packet, 32),
         .sale_condition_flags = ReadLittleEndian<uint8_t>(packet, 3),
+        .session              = static_cast<uint8_t>(session_),
     });
 }
 

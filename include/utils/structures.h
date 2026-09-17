@@ -8,6 +8,8 @@ struct QuoteUpdate {
     int64_t bid_price;
     int64_t ask_price;
     uint32_t ask_size;
+    uint8_t  flags;
+    uint8_t  session;
 };
 
 struct QuoteUpdateMsg {
@@ -17,6 +19,8 @@ struct QuoteUpdateMsg {
     int64_t  bid_price;
     int64_t  ask_price;
     uint32_t ask_size;
+    uint8_t  flags;
+    uint8_t  session;
 };
 
 struct TradeReport {
@@ -26,6 +30,7 @@ struct TradeReport {
     int64_t  price;
     int64_t  trade_id;
     uint8_t  sale_condition_flags;
+    uint8_t  session;
 };
 
 struct TradeReportMsg {
@@ -35,6 +40,7 @@ struct TradeReportMsg {
     int64_t  price;
     int64_t  trade_id;
     uint8_t  sale_condition_flags;
+    uint8_t  session;
 };
 
 struct TradeBreak {
@@ -44,6 +50,7 @@ struct TradeBreak {
     int64_t  price;
     int64_t  trade_id;
     uint8_t  sale_condition_flags;
+    uint8_t  session;
 };
 
 struct TradeBreakMsg {
@@ -53,4 +60,5 @@ struct TradeBreakMsg {
     int64_t  price;
     int64_t  trade_id;
     uint8_t  sale_condition_flags;
+    uint8_t  session;
 };
