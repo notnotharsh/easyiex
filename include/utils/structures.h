@@ -62,3 +62,19 @@ struct TradeBreakMsg {
     uint8_t  sale_condition_flags;
     uint8_t  session;
 };
+
+struct OfficialPrice {
+    uint64_t timestamp;
+    uint16_t symbol_id;
+    uint8_t  price_type;
+    int64_t  price;
+    uint8_t  session;
+};
+
+struct OfficialPriceMsg {
+    uint64_t timestamp;
+    int64_t  raw_symbol;
+    uint8_t  price_type;
+    int64_t  price;
+    uint8_t  session;
+};

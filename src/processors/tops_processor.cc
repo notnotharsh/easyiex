@@ -11,6 +11,7 @@ std::string TopsProcessor::SetupOutputDir(const std::string& pcap_name) {
     fs::create_directories(out + "/quotes");
     fs::create_directories(out + "/trades");
     fs::create_directories(out + "/breaks");
+    fs::create_directories(out + "/official_prices");
     return out;
 }
 
@@ -19,7 +20,8 @@ TopsProcessor::TopsProcessor(std::string pcap_name)
     , output_dir_(SetupOutputDir(pcap_name))
     , quote_pool_(output_dir_ + "/quotes/quotes_")
     , trade_pool_(output_dir_ + "/trades/trades_")
-    , break_pool_(output_dir_ + "/breaks/breaks_") {}
+    , break_pool_(output_dir_ + "/breaks/breaks_")
+    , official_pool_(output_dir_ + "/official_prices/official_prices_") {}
 
 void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
     uint8_t message_byte = ReadLittleEndian<uint8_t>(packet, 2);
@@ -41,7 +43,9 @@ void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
         case TopsMessageType::TradeReportMessage:
             ProcessTradeReportMessage(packet);
             break;
-        case TopsMessageType::OfficialPriceMessage:               break;
+        case TopsMessageType::OfficialPriceMessage:
+            ProcessOfficialPriceMessage(packet);
+            break;
         case TopsMessageType::TradeBreakMessage:
             ProcessTradeBreakMessage(packet);
             break;
@@ -101,6 +105,17 @@ void TopsProcessor::ProcessTradeBreakMessage(std::span<const std::byte> packet) 
     });
 }
 
+void TopsProcessor::ProcessOfficialPriceMessage(std::span<const std::byte> packet) {
+    int64_t raw_symbol = ReadLittleEndian<int64_t>(packet, 12);
+    official_pool_.Dispatch(raw_symbol, OfficialPriceMsg{
+        .timestamp  = ReadLittleEndian<uint64_t>(packet, 4),
+        .raw_symbol = raw_symbol,
+        .price_type = ReadLittleEndian<uint8_t>(packet, 3),
+        .price      = ReadLittleEndian<int64_t>(packet, 20),
+        .session    = static_cast<uint8_t>(session_),
+    });
+}
+
 void TopsProcessor::WriteShardMap() const {
     std::ofstream f(output_dir_ + "/shard_map.json");
     f << "{\n  \"quotes\": {";
@@ -127,6 +142,14 @@ void TopsProcessor::WriteShardMap() const {
             first = false;
         }
     });
+    f << "\n  },\n  \"official_prices\": {";
+    first = true;
+    official_pool_.ForEachWorker([&](int shard, const OfficialPriceWorker& w) {
+        for (const auto& sym : w.Symbols()) {
+            f << (first ? "\n" : ",\n") << "    \"" << sym << "\": " << shard;
+            first = false;
+        }
+    });
     f << "\n  }\n}\n";
 }
 
@@ -134,5 +157,6 @@ void TopsProcessor::WriteToParquet() {
     quote_pool_.Close();
     trade_pool_.Close();
     break_pool_.Close();
+    official_pool_.Close();
     WriteShardMap();
 }

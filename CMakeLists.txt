@@ -15,6 +15,7 @@ add_executable(main
     include/processors/tops_workers/quote_update_worker.h
     include/processors/tops_workers/trade_report_worker.h
     include/processors/tops_workers/trade_break_worker.h
+    include/processors/tops_workers/official_price_worker.h
     src/main.cc
     src/processors/tops_processor.cc
     src/utils/endian_utils.cc
@@ -22,6 +23,7 @@ add_executable(main
     src/persistence/quote_update_table_builder.cc
     src/persistence/trade_report_table_builder.cc
     src/persistence/trade_break_table_builder.cc
+    src/persistence/official_price_table_builder.cc
 )
 
 find_library(PCAP_LIB pcap REQUIRED)
