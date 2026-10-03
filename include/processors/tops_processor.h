@@ -1,6 +1,9 @@
 #pragma once
-#include "processors/pcap_processor.h"
+#include <cstdint>
+#include <unordered_map>
+
 #include "utils/worker_pool.h"
+#include "processors/pcap_processor.h"
 #include "processors/tops_workers/quote_update_worker.h"
 #include "processors/tops_workers/trade_report_worker.h"
 #include "processors/tops_workers/trade_break_worker.h"
@@ -38,6 +41,8 @@ private:
     WorkerPool<TradeReportWorker, TradeReportMsg> trade_pool_;
     WorkerPool<TradeBreakWorker, TradeBreakMsg> break_pool_;
     WorkerPool<OfficialPriceWorker, OfficialPriceMsg> official_pool_;
+
+    std::unordered_map<uint8_t, uint64_t> unknown_type_counts_;
 
     static std::string SetupOutputDir(const std::string& pcap_name);
     void WriteShardMap() const;

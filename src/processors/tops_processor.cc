@@ -50,7 +50,8 @@ void TopsProcessor::ProcessPacket(std::span<const std::byte> packet) {
             ProcessTradeBreakMessage(packet);
             break;
         case TopsMessageType::AuctionInformationMessage:          break;
-        default: std::cout << message_byte << std::endl;
+        default:
+            ++unknown_type_counts_[message_byte];
     }
 }
 
@@ -158,5 +159,10 @@ void TopsProcessor::WriteToParquet() {
     trade_pool_.Close();
     break_pool_.Close();
     official_pool_.Close();
-    WriteShardMap();
+    for (const auto& [type, count] : unknown_type_counts_) {
+        std::cout << "skipped unknown message type 0x" << std::hex
+                  << static_cast<int>(type) << ": " << std::dec << count
+                  << (count == 1 ? " message" : " messages") << '\n';
+    }
+    unknown_type_counts_.clear();
 }
